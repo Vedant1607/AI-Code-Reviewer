@@ -1,14 +1,14 @@
 import { generateContent } from '../services/ai.service.js';
 
-const getResponse = async (req, res) => {
-    const prompt = req.query.prompt;
+const getReview = async (req, res) => {
+    const code = req.body.code;
 
-    if (!prompt) {
-        return res.status(400).send("Prompt is required");
+    if (!code) {
+        return res.status(400).send("code is required");
     }
 
     try {
-        const response = await generateContent(prompt);
+        const response = await generateContent(code);
         res.send(response);
     } catch (err) {
         console.error("AI generation failed:", err);
@@ -16,4 +16,4 @@ const getResponse = async (req, res) => {
     }
 }
 
-export default getResponse;
+export default getReview;
