@@ -17,6 +17,7 @@
     "react-dom": "^19.1.1",
     "react-markdown": "^10.1.0",
     "react-simple-code-editor": "^0.14.1",
+    "rehype-highlight": "^7.0.2",
     "tailwindcss": "^4.1.14"
   },
   "devDependencies": {

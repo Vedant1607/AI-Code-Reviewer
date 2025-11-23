@@ -5,6 +5,8 @@ import 'prismjs/components/prism-javascript';
 import Editor from 'react-simple-code-editor';
 import axios from "axios";
 import Markdown from "react-markdown";
+import rehypeHighlight from "rehype-highlight";
+import "highlight.js/styles/github-dark.css"
 
 const App = () => {
 
@@ -28,10 +30,10 @@ const App = () => {
       <main className="h-full p-6 flex gap-4">
         
         {/* Left Panel */}
-        <div className="relative h-full basis-1/2 rounded-xl bg-black p-4 font-mono text-sm">
+        <div className="relative h-full basis-1/2 rounded-xl bg-black p-4 font-mono text-sm overflow-y-scroll">
           <Editor
-            value={code}                     // FIXED
-            onValueChange={code => setCode(code)}   // FIXED
+            value={code}
+            onValueChange={code => setCode(code)}
             highlight={code =>
               Prism.highlight(code, Prism.languages.javascript, "javascript")
             }
@@ -41,9 +43,9 @@ const App = () => {
               fontSize: 16,
               height: "100%",
               width: "100%",
-              background: "#000",          // matches your container
+              background: "#000",
               color: "white",
-              borderRadius: "0.75rem"      // same as rounded-xl
+              borderRadius: "0.75rem"
             }}
           />
 
@@ -58,7 +60,8 @@ const App = () => {
 
         {/* Right Panel */}
         <div className="h-full basis-1/2 rounded-xl bg-[#343434] py-4 px-8 text-xl text-white overflow-y-scroll">
-          <Markdown>
+          <Markdown
+            rehypePlugins={[ rehypeHighlight ]}>
             {review}
           </Markdown>
         </div>
