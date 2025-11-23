@@ -25,6 +25,7 @@ export async function generateContent(code) {
       { role: "system", content: systemPrompt },
       { role: "user", content: code },
     ],
+    max_tokens: 1024,
   });
 
   const text = completion.choices?.[0]?.message?.content ?? "";
