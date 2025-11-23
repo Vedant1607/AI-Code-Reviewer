@@ -4,6 +4,7 @@ import 'prismjs/themes/prism-tomorrow.css';
 import 'prismjs/components/prism-javascript';
 import Editor from 'react-simple-code-editor';
 import axios from "axios";
+import Markdown from "react-markdown";
 
 const App = () => {
 
@@ -56,9 +57,10 @@ const App = () => {
         </div>
 
         {/* Right Panel */}
-        <div className="h-full basis-1/2 rounded-xl bg-[#343434]">
-          {/* Other content would go here */}
-          {review}
+        <div className="h-full basis-1/2 rounded-xl bg-[#343434] py-4 px-8 text-xl text-white overflow-y-scroll">
+          <Markdown>
+            {review}
+          </Markdown>
         </div>
 
       </main>
