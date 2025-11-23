@@ -29,6 +29,5 @@ export async function generateContent(code) {
   });
 
   const text = completion.choices?.[0]?.message?.content ?? "";
-  console.log(text)
   return text;
 }
