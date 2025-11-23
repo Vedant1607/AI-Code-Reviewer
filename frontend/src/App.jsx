@@ -2,17 +2,25 @@ import { useEffect, useState } from 'react';
 import Prism from 'prismjs';
 import 'prismjs/themes/prism-tomorrow.css';
 import 'prismjs/components/prism-javascript';
-import Editor from 'react-simple-code-editor'
+import Editor from 'react-simple-code-editor';
+import axios from "axios";
 
 const App = () => {
 
   const [code, setCode] = useState(`function sum() {
     return 1 + 1;
   }`);
+  const [review, setReview] = useState(``);
 
   useEffect(() => {
     Prism.highlightAll();
   }, []);
+
+  async function reviewCode() {
+    const response = await axios.post('http://localhost:3000/ai/get-review', { code });
+
+    setReview(response.data);
+  }
 
   return (
     <div className="h-screen w-full bg-[#1e1e1e]">
@@ -39,6 +47,7 @@ const App = () => {
           />
 
           <button 
+          onClick={reviewCode}
             type="button"
             className="absolute bottom-4 right-4 rounded-xl bg-[rgb(219,219,255)] px-8 py-2 font-bold text-black select-none cursor-pointer transition hover:bg-white"
           >
@@ -49,6 +58,7 @@ const App = () => {
         {/* Right Panel */}
         <div className="h-full basis-1/2 rounded-xl bg-[#343434]">
           {/* Other content would go here */}
+          {review}
         </div>
 
       </main>
