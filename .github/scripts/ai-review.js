@@ -82,7 +82,7 @@ Be concise but thorough. Use markdown formatting. If the code is good, say so!`;
         { role: "user", content: userPrompt },
       ]);
 
-      reviewMarkdown += `### 📄 \`${file}\`\n\n${review}\n\n---\n\n`;
+      reviewMarkdown += `### 📄 \`${file}\`\n\n${review.choices[0].message.content}\n\n---\n\n`;
 
       // Rate limiting
       await new Promise((resolve) => setTimeout(resolve, 1000));
