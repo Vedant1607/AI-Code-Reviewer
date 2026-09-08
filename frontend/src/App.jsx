@@ -20,20 +20,37 @@ const App = () => {
     Prism.highlightAll();
   }, []);
 
-  const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_RENDER_URL || "http://localhost:5000";
+  const rawBackendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_RENDER_URL || "http://localhost:5000";
+  const baseUrl = rawBackendUrl
+    .trim()
+    .replace(/\/+$/, '')
+    .replace(/\/ai\/get-review$/, '')
+    .replace(/\/get-review$/, '')
+    .replace(/\/ai$/, '');
+
+  const targetUrl = `${baseUrl}/ai/get-review`;
 
   async function reviewCode() {
     if (!code.trim()) return;
     setLoading(true);
     setReview("Analyzing code...");
     try {
-      const response = await axios.post(`${backendUrl}/ai/get-review`, { code });
+      const response = await axios.post(targetUrl, { code });
       const result = typeof response.data === 'string' ? response.data : (response.data.review || JSON.stringify(response.data));
       setReview(result);
     } catch (err) {
       console.error("Failed to get review:", err);
-      const errMsg = err.response?.data || err.message || "Failed to fetch review from backend.";
-      setReview(`### ⚠️ Error\n${typeof errMsg === 'object' ? JSON.stringify(errMsg) : errMsg}`);
+      let errorDetails = "";
+      if (err.response?.status === 404) {
+        errorDetails = `**404 Not Found**: Could not connect to backend endpoint at \`${targetUrl}\`.\n\n` +
+          `* **Vercel Settings**: Verify that \`VITE_BACKEND_URL\` in Vercel Project Settings points to your deployed Render URL (e.g., \`https://ai-code-reviewer-backend.onrender.com\`).\n` +
+          `* **Render Status**: Ensure your Render web service is live and finished building.`;
+      } else if (err.response?.data) {
+        errorDetails = typeof err.response.data === 'object' ? JSON.stringify(err.response.data, null, 2) : String(err.response.data);
+      } else {
+        errorDetails = err.message || "Network error. Failed to reach backend server.";
+      }
+      setReview(`### ⚠️ Request Failed\n\n${errorDetails}`);
     } finally {
       setLoading(false);
     }

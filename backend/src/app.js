@@ -47,6 +47,7 @@ const limiter = rateLimit({
   legacyHeaders: false,
 });
 app.use('/ai', limiter);
+app.use('/get-review', limiter);
 
 // Body parsing with size limit
 app.use(express.json({ limit: '10mb' }));
@@ -58,6 +59,7 @@ app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
 // Routes
 app.use('/ai', aiRoutes);
+app.use('/', aiRoutes);
 
 // 404 handler
 app.use((req, res) => {
