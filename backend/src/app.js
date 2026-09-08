@@ -7,36 +7,40 @@ import rateLimit from 'express-rate-limit';
 export const app = express();
 
 // Security headers
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
 
 // CORS configuration
 const envOrigins = process.env.ALLOWED_ORIGINS?.split(',').map(o => o.trim()).filter(Boolean);
-const allowedOrigins = (envOrigins && envOrigins.length > 0 ? envOrigins : [
-  "http://localhost:5173",
-  "http://localhost:5174",
-  "http://localhost:3000"
-]).map(o => o.replace(/\/$/, "")); // remove trailing slash
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow server-to-server, postman, or curl (no origin)
+    // Allow non-browser requests (mobile apps, curl, server-to-server)
     if (!origin) return callback(null, true);
 
-    const isAllowed = allowedOrigins.some(o => 
+    // If ALLOWED_ORIGINS is not set or contains *, allow all origins dynamically
+    if (!envOrigins || envOrigins.length === 0 || envOrigins.includes('*')) {
+      return callback(null, true);
+    }
+
+    // Check against configured envOrigins or any .vercel.app deployment or localhost
+    const isAllowed = envOrigins.some(o => 
       o === '*' || 
       origin === o || 
-      origin.endsWith('.vercel.app') || 
-      o.replace(/\/$/, '') === origin
-    );
+      origin.replace(/\/$/, '') === o.replace(/\/$/, '')
+    ) || origin.endsWith('.vercel.app') || origin.includes('localhost') || origin.includes('127.0.0.1');
 
     if (isAllowed) {
       callback(null, true);
     } else {
       console.warn("Blocked by CORS:", origin);
-      callback(new Error("Not allowed by CORS"));
+      callback(null, false);
     }
   },
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 
 // Rate limiting
