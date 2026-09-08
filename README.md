@@ -76,7 +76,32 @@ An intelligent, AI-powered code review tool that provides instant feedback on yo
    cd frontend
    npm run dev
    ```
-   The app will be available at `http://localhost:5173`
+   The app will be available at `http://localhost:5173` (or `http://localhost:5174`)
+
+## 🌐 Deployment Guide (Render + Vercel)
+
+### 1. Backend Deployment on Render
+1. Create a new **Web Service** on [Render](https://render.com).
+2. Connect your Git repository.
+3. Configure the following settings:
+   - **Root Directory**: `backend`
+   - **Build Command**: `npm install`
+   - **Start Command**: `npm start`
+4. Set Environment Variables:
+   - `OPENROUTER_API_KEY`: Your OpenRouter API Key
+   - `ALLOWED_ORIGINS`: `https://your-app-name.vercel.app` (or `*` to allow all)
+5. Deploy service and note down your backend URL (e.g. `https://ai-code-reviewer-backend.onrender.com`).
+
+### 2. Frontend Deployment on Vercel
+1. Import repository on [Vercel](https://vercel.com).
+2. Configure project settings:
+   - **Root Directory**: `frontend` (or default if using root `vercel.json`)
+   - **Framework Preset**: `Vite`
+   - **Build Command**: `npm run build`
+   - **Output Directory**: `dist`
+3. Set Environment Variable:
+   - `VITE_BACKEND_URL`: `https://ai-code-reviewer-backend.onrender.com` (Your Render backend URL)
+4. Deploy!
 
 ## 📖 Usage
 

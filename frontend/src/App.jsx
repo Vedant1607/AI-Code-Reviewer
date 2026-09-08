@@ -14,15 +14,29 @@ const App = () => {
     return 1 + 1;
   }`);
   const [review, setReview] = useState(``);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     Prism.highlightAll();
   }, []);
 
-  async function reviewCode() {
-    const response = await axios.post(import.meta.env.VITE_RENDER_URL, { code });
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_RENDER_URL || "http://localhost:5000";
 
-    setReview(response.data);
+  async function reviewCode() {
+    if (!code.trim()) return;
+    setLoading(true);
+    setReview("Analyzing code...");
+    try {
+      const response = await axios.post(`${backendUrl}/ai/get-review`, { code });
+      const result = typeof response.data === 'string' ? response.data : (response.data.review || JSON.stringify(response.data));
+      setReview(result);
+    } catch (err) {
+      console.error("Failed to get review:", err);
+      const errMsg = err.response?.data || err.message || "Failed to fetch review from backend.";
+      setReview(`### ⚠️ Error\n${typeof errMsg === 'object' ? JSON.stringify(errMsg) : errMsg}`);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -50,11 +64,12 @@ const App = () => {
           />
 
           <button 
-          onClick={reviewCode}
+            onClick={reviewCode}
+            disabled={loading}
             type="button"
-            className="absolute bottom-4 right-4 rounded-xl bg-[rgb(219,219,255)] px-8 py-2 font-bold text-black select-none cursor-pointer transition hover:bg-white"
+            className="absolute bottom-4 right-4 rounded-xl bg-[rgb(219,219,255)] px-8 py-2 font-bold text-black select-none cursor-pointer transition hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Review
+            {loading ? "Reviewing..." : "Review"}
           </button>
         </div>
 
@@ -62,7 +77,7 @@ const App = () => {
         <div className="h-full basis-1/2 rounded-xl bg-[#343434] py-4 px-8 text-xl text-white overflow-y-scroll">
           <Markdown
             rehypePlugins={[ rehypeHighlight ]}>
-            {review}
+            {review || "*Click 'Review' to generate code feedback.*"}
           </Markdown>
         </div>
 

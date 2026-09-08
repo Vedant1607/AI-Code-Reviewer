@@ -10,17 +10,26 @@ export const app = express();
 app.use(helmet());
 
 // CORS configuration
-const allowedOrigins = (process.env.ALLOWED_ORIGINS?.split(',') || [
+const envOrigins = process.env.ALLOWED_ORIGINS?.split(',').map(o => o.trim()).filter(Boolean);
+const allowedOrigins = (envOrigins && envOrigins.length > 0 ? envOrigins : [
   "http://localhost:5173",
+  "http://localhost:5174",
   "http://localhost:3000"
 ]).map(o => o.replace(/\/$/, "")); // remove trailing slash
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow server-to-server or curl (no origin)
+    // Allow server-to-server, postman, or curl (no origin)
     if (!origin) return callback(null, true);
 
-    if (allowedOrigins.includes(origin)) {
+    const isAllowed = allowedOrigins.some(o => 
+      o === '*' || 
+      origin === o || 
+      origin.endsWith('.vercel.app') || 
+      o.replace(/\/$/, '') === origin
+    );
+
+    if (isAllowed) {
       callback(null, true);
     } else {
       console.warn("Blocked by CORS:", origin);
@@ -43,7 +52,8 @@ app.use('/ai', limiter);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Health check
+// Health checks
+app.get('/', (req, res) => res.json({ status: 'ok', message: 'AI Code Reviewer API Service' }));
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
 // Routes

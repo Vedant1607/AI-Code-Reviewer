@@ -19,15 +19,36 @@ export async function generateContent(code) {
   const systemPrompt =
     "You are a senior code reviewer. Provide concise, actionable feedback on correctness, security, performance, readability, and best practices. Suggest improved code when helpful.";
 
-  const completion = await openai.chat.completions.create({
-    model: "anthropic/claude-sonnet-4.5",
-    messages: [
-      { role: "system", content: systemPrompt },
-      { role: "user", content: code },
-    ],
-    max_tokens: 1024,
-  });
+  const modelsToTry = [
+    process.env.AI_MODEL,
+    "google/gemini-3.6-flash",
+    "google/gemini-2.5-flash",
+    "meta-llama/llama-3.3-70b-instruct:free"
+  ].filter(Boolean);
 
-  const text = completion.choices?.[0]?.message?.content ?? "";
-  return text;
+  let lastError = null;
+
+  for (const model of modelsToTry) {
+    try {
+      const completion = await openai.chat.completions.create({
+        model,
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: code },
+        ],
+        max_tokens: 2048,
+      });
+
+      const message = completion.choices?.[0]?.message;
+      const text = message?.content || message?.reasoning || "";
+      if (text) {
+        return text;
+      }
+    } catch (err) {
+      console.warn(`Model ${model} failed:`, err.message || err);
+      lastError = err;
+    }
+  }
+
+  throw lastError || new Error("Failed to generate code review from AI models.");
 }

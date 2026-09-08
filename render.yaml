@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: ai-code-reviewer-backend
+    env: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: ALLOWED_ORIGINS
+        value: "*"
